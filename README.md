@@ -1,6 +1,6 @@
 # ModuleKit
 
-**A development kit for building and testing smart account modules**
+**A development kit for building and testing smart account modules - Twaked over Rhinestone for Superform needs**
 
 ModuleKit allows you to:
 
