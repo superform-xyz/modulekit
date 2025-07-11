@@ -11,7 +11,6 @@ import { NexusFactory } from "../accounts/nexus/NexusFactory.sol";
 import { Auxiliary, AuxiliaryFactory } from "./Auxiliary.sol";
 
 // Helpers
-import { HelperBase } from "./helpers/HelperBase.sol";
 import { ERC7579Helpers } from "./helpers/ERC7579Helpers.sol";
 import { SafeHelpers } from "./helpers/SafeHelpers.sol";
 import { KernelHelpers } from "./helpers/KernelHelpers.sol";
@@ -135,7 +134,78 @@ contract RhinestoneModuleKit is AuxiliaryFactory {
     /*//////////////////////////////////////////////////////////////
                                   INIT
     //////////////////////////////////////////////////////////////*/
+     /// @notice Initialize the module kit with the provided environment, deploy the factories,
+    ///         helpers, and validators, and stake them on the entrypoint
+    function _initializeModuleKit(string memory _env, bytes32 salt) internal {
+        // Init
+        super.init();
+        isInit[block.chainid] = true;
 
+        // Factories
+        writeFactory(address(new ERC7579Factory{salt: salt}()), DEFAULT);
+        writeFactory(address(new SafeFactory{salt: salt}()), SAFE);
+        writeFactory(address(new KernelFactory{salt: salt}()), KERNEL);
+        writeFactory(address(new NexusFactory{salt: salt}()), NEXUS);
+        writeFactory(address(new ERC7579Factory()), CUSTOM);
+
+        // Helpers
+        writeHelper(address(new ERC7579Helpers{salt: salt}()), DEFAULT);
+        writeHelper(address(new SafeHelpers{salt: salt}()), SAFE);
+        writeHelper(address(new KernelHelpers{salt: salt}()), KERNEL);
+        writeHelper(address(new NexusHelpers{salt: salt}()), NEXUS);
+        writeHelper(address(new ERC7579Helpers()), CUSTOM);
+
+        // Initialize factories
+        IAccountFactory safeFactory = IAccountFactory(getFactory(SAFE));
+        IAccountFactory kernelFactory = IAccountFactory(getFactory(KERNEL));
+        IAccountFactory erc7579Factory = IAccountFactory(getFactory(DEFAULT));
+        IAccountFactory nexusFactory = IAccountFactory(getFactory(NEXUS));
+        IAccountFactory customFactory = IAccountFactory(getFactory(CUSTOM));
+        safeFactory.init();
+        kernelFactory.init();
+        erc7579Factory.init();
+        nexusFactory.init();
+        customFactory.init();
+
+        // Label factories
+        label(address(safeFactory), "SafeFactory");
+        label(address(kernelFactory), "KernelFactory");
+        label(address(erc7579Factory), "ERC7579Factory");
+        label(address(nexusFactory), "NexusFactory");
+        label(address(customFactory), "CustomFactory");
+
+        // Stake factory on EntryPoint
+        deal(address(safeFactory), 10 ether);
+        deal(address(kernelFactory), 10 ether);
+        deal(address(erc7579Factory), 10 ether);
+        deal(address(nexusFactory), 10 ether);
+        deal(address(customFactory), 10 ether);
+
+        // Stake on EntryPoint
+        prank(address(safeFactory));
+        IStakeManager(ENTRYPOINT_ADDR).addStake{ value: 10 ether }(100_000);
+        prank(address(kernelFactory));
+        IStakeManager(ENTRYPOINT_ADDR).addStake{ value: 10 ether }(100_000);
+        prank(address(erc7579Factory));
+        IStakeManager(ENTRYPOINT_ADDR).addStake{ value: 10 ether }(100_000);
+        prank(address(nexusFactory));
+        IStakeManager(ENTRYPOINT_ADDR).addStake{ value: 10 ether }(100_000);
+
+        // Set env
+        ModuleKitHelpers.setAccountEnv(_env);
+
+        // Set factory
+        IAccountFactory accountFactory = IAccountFactory(getFactory(_env));
+        label(address(accountFactory), "AccountFactory");
+
+        // Set default validator
+        _defaultValidator = new MockValidator{salt: salt}();
+        label(address(_defaultValidator), "DefaultValidator");
+
+        // Set session validator
+        _defaultSessionValidator = new MockStatelessValidator{salt: salt}();
+        label(address(_defaultSessionValidator), "SessionValidator");
+    }
     /// @notice Initialize the module kit with the provided environment, deploy the factories,
     ///         helpers, and validators, and stake them on the entrypoint
     function _initializeModuleKit(string memory _env) internal {
