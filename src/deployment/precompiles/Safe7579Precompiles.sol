@@ -17,7 +17,7 @@ contract Safe7579Precompiles is BytecodeDeployer {
     //////////////////////////////////////////////////////////////*/
 
     function deploySafe7579() internal returns (ISafe7579 safe) {
-        safe = ISafe7579(_deploy(SAFE7579_BYTECODE));
+        safe = ISafe7579(_deploy2(SAFE7579_BYTECODE, keccak256("123")));
         label(address(safe), "Safe7579");
     }
 
@@ -31,17 +31,17 @@ contract Safe7579Precompiles is BytecodeDeployer {
         // Concat constructor params to bytecode
         bytes memory creationBytecode =
             bytes.concat(SAFE7579_LAUNCHPAD_BYTECODE, abi.encode(entrypoint, registry));
-        safeLaunchpad = ISafe7579Launchpad(_deploy(creationBytecode));
+        safeLaunchpad = ISafe7579Launchpad(_deploy2(creationBytecode, keccak256("123")));
         label(address(safeLaunchpad), "Safe7579Launchpad");
     }
 
     function deploySafeSingleton() internal returns (address safeSingleton) {
-        safeSingleton = _deploy(SAFE_SINGLETON_BYTECODE);
+        safeSingleton = _deploy2(SAFE_SINGLETON_BYTECODE, keccak256("123"));
         label(safeSingleton, "SafeSingleton");
     }
 
     function deploySafeProxyFactory() internal returns (ISafeProxyFactory safeProxyFactory) {
-        safeProxyFactory = ISafeProxyFactory(_deploy(SAFE_PROXY_FACTORY_BYTECODE));
+        safeProxyFactory = ISafeProxyFactory(_deploy2(SAFE_PROXY_FACTORY_BYTECODE, keccak256("123")));
         label(address(safeProxyFactory), "SafeProxyFactory");
     }
 
