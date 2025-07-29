@@ -28,8 +28,9 @@
     "changeset:version": "changeset version && pnpm install --lockfile-only"
   },
   "dependencies": {
-    "@ERC4337/account-abstraction": "github:kopy-kat/account-abstraction#develop",
+    "@ERC4337/account-abstraction": "github:eth-infinitism/account-abstraction#v0.8.0",
     "@ERC4337/account-abstraction-v0.6": "github:eth-infinitism/account-abstraction#v0.6.0",
+    "@openzeppelin/contracts": "5.1.0",
     "@prb/math": "^4.1.0",
     "@rhinestone/erc4337-validation": "^0.0.5",
     "@rhinestone/sentinellist": "github:rhinestonewtf/sentinellist",
@@ -62,5 +63,6 @@
   ],
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "packageManager": "pnpm@9.15.4+sha512.b2dc20e2fc72b3e18848459b37359a32064663e5627a51e4c74b2c29dd8e8e0491483c3abb40789cfd578bf362fb6ba8261b05f0387d76792ed6e23ea3b1b6a0"
 }
