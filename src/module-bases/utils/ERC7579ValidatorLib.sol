@@ -137,7 +137,7 @@ abstract contract Decoder {
 
     function validate(PackedUserOperation calldata userOp) internal {
         ACCOUNT_EXEC_TYPE accountExecType = userOp.callData.decodeExecType();
-        address smartAccount = userOp.getSender();
+        address smartAccount = userOp.sender;
 
         if (ACCOUNT_EXEC_TYPE.EXEC_SINGLE == accountExecType) {
             (address target, uint256 value, bytes calldata data) =

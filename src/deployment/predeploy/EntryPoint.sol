@@ -9,13 +9,14 @@ import { IEntryPoint } from "../../external/ERC4337.sol";
 
 // External Dependencies
 import { SenderCreator } from "@ERC4337/account-abstraction/contracts/core/EntryPoint.sol";
+import { ISenderCreator } from
+    "@ERC4337/account-abstraction/contracts/interfaces/ISenderCreator.sol";
 import { EntryPointSimulations } from
     "@ERC4337/account-abstraction/contracts/core/EntryPointSimulations.sol";
 
 contract EntryPointSimulationsPatch is EntryPointSimulations {
     address public _entrypointAddr = address(this);
-
-    SenderCreator public _newSenderCreator;
+    SenderCreator private _senderCreator;
 
     function init(address entrypointAddr) public {
         _entrypointAddr = entrypointAddr;
@@ -23,20 +24,19 @@ contract EntryPointSimulationsPatch is EntryPointSimulations {
     }
 
     function initSenderCreator() internal override {
-        //this is the address of the first contract created with CREATE by this address.
-        address createdObj = address(
-            uint160(uint256(keccak256(abi.encodePacked(hex"d694", _entrypointAddr, hex"01"))))
-        );
-        _newSenderCreator = SenderCreator(createdObj);
+        // Create a new SenderCreator that recognizes this contract as the EntryPoint
+        _senderCreator = new SenderCreator();
+
+        _initDomainSeparator();
     }
 
-    function senderCreator() internal view virtual override returns (SenderCreator) {
-        return _newSenderCreator;
+    function senderCreator() public view virtual override returns (ISenderCreator) {
+        return _senderCreator;
     }
 }
 
 /// @dev Preset entrypoint address
-address constant ENTRYPOINT_ADDR = 0x0000000071727De22E5E9d8BAf0edAc6f37da032;
+address constant ENTRYPOINT_ADDR = 0x4337084D9E255Ff0702461CF8895CE9E3b5Ff108;
 
 function etchEntrypoint() returns (IEntryPoint) {
     address payable entryPoint = payable(address(new EntryPointSimulationsPatch()));
